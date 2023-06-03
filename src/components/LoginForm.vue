@@ -35,7 +35,7 @@ const handleSubmit = async () => {
     payload[input.name] = input.value;
   });
   try {
-    authenticateUser(payload);
+    await authenticateUser(payload);
     snackbarsStore.setSuccessSnackbar(true, "Success!");
     router.push({ name: "Dashboard" });
   } catch (err) {
@@ -71,7 +71,7 @@ const handleSubmit = async () => {
     <SubmitButton
       :loading="isLoading"
       :disabled="!isValid"
-      label="Sign up"
+      label="Login"
     ></SubmitButton>
   </v-form>
 </template>
