@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { handleError } from "@/helpers";
+import { handleFormError } from "@/helpers";
 import { CustomInputField } from "@/types";
 import axios from "axios";
 import { ref } from "vue";
@@ -77,7 +77,7 @@ const handleSubmit = async () => {
     snackbarsStore.setSuccessSnackbar(true, "User successfully created");
     router.push({ name: "Login" });
   } catch (err) {
-    handleError(err, formInputs);
+    handleFormError(err, formInputs);
     snackbarsStore.setfailureSnackbar(true, "Error while creating user");
   } finally {
     isLoading.value = false;

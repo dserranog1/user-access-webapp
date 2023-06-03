@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { handleError } from "@/helpers";
+import { authenticateUser, handleFormError } from "@/helpers";
 import { emailRules } from "@/shared/fieldRules";
 import { createPasswordField } from "@/shared/fields";
 import { useSnackbarsStore } from "@/stores/snackbars";
 import { CustomInputField } from "@/types";
-import axios from "axios";
 import { ref } from "vue";
 import SubmitButton from "./ui/SubmitButton.vue";
+import { useRouter } from "vue-router";
 
 const snackbarsStore = useSnackbarsStore();
+const router = useRouter();
 
 const isValid = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
@@ -34,14 +35,11 @@ const handleSubmit = async () => {
     payload[input.name] = input.value;
   });
   try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_HOST_URL}/collections/users/auth-with-password`,
-      payload
-    );
-    localStorage.setItem("JWT", response.data.token);
+    authenticateUser(payload);
     snackbarsStore.setSuccessSnackbar(true, "Success!");
+    router.push({ name: "Dashboard" });
   } catch (err) {
-    handleError(err, formInputs);
+    handleFormError(err, formInputs);
     snackbarsStore.setfailureSnackbar(
       true,
       "There has been an error while logging you in"

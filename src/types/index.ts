@@ -8,3 +8,10 @@ export type CustomInputField = {
   value: string;
   error: string;
 };
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  username: string;
+};
