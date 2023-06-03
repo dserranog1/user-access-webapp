@@ -4,8 +4,8 @@ import { emailRegex } from "@/misc/regex";
 import { CustomInputField } from "@/types";
 import axios from "axios";
 import { ref } from "vue";
-import SuccessSnackbar from "./ui/SuccessSnackbar.vue";
-import FailureSnackbar from "./ui/FailureSnackbar.vue";
+import { useRouter } from "vue-router";
+import { useSnackbarsStore } from "@/stores/snackbars";
 
 const nameRules = [
   (value: string) => {
@@ -100,6 +100,8 @@ const isValid = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
 const successSnackbar = ref<boolean>(false);
 const failSnackback = ref<boolean>(false);
+const router = useRouter();
+const snackbarsStore = useSnackbarsStore();
 
 const handleSubmit = async () => {
   isLoading.value = true;
@@ -113,9 +115,12 @@ const handleSubmit = async () => {
       payload
     );
     successSnackbar.value = true;
+    snackbarsStore.setSuccessSnackbar(true, "User successfully created");
+    router.push({ name: "Login" });
   } catch (err) {
     handleError(err, formInputs);
     failSnackback.value = true;
+    snackbarsStore.setfailureSnackbar(true, "Error while creating user");
   } finally {
     isLoading.value = false;
   }
@@ -153,12 +158,4 @@ const handleSubmit = async () => {
       >Sign up
     </v-btn>
   </v-form>
-  <SuccessSnackbar
-    message="User successfully created"
-    v-model="successSnackbar"
-  ></SuccessSnackbar>
-  <FailureSnackbar
-    message="Error while creating user"
-    v-model="failSnackback"
-  ></FailureSnackbar>
 </template>
