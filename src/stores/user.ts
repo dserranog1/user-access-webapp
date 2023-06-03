@@ -8,5 +8,8 @@ export const useUserStore = defineStore("user", () => {
   const setUser = (userData: User) => {
     user.value = userData;
   };
-  return { user, setUser };
+  const removeUser = () => {
+    user.value = null;
+  };
+  return { user, setUser, removeUser };
 });

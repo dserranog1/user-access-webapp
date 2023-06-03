@@ -10,6 +10,14 @@ import SignUpForm from "@/components/SignUpForm.vue";
       <div class="tw-w-64">
         <SignUpForm />
       </div>
+      <div class="tw-flex tw-flex-row tw-gap-4 tw-justify-between mt-6">
+        <router-link to="/">
+          <v-btn color="light-blue-darken-2" variant="outlined">Home </v-btn>
+        </router-link>
+        <router-link to="login">
+          <v-btn color="light-blue-darken-2" variant="outlined">Login </v-btn>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
