@@ -1,61 +1,79 @@
 <script setup lang="ts">
-import { emailRegex } from "@/misc/regex";
+import { handleError } from "@/helpers";
+import { emailRules } from "@/shared/fieldRules";
+import { createPasswordField } from "@/shared/fields";
+import { useSnackbarsStore } from "@/stores/snackbars";
+import { CustomInputField } from "@/types";
+import axios from "axios";
 import { ref } from "vue";
+import SubmitButton from "./ui/SubmitButton.vue";
 
-const email = ref<string>("");
-const password = ref<string>("");
+const snackbarsStore = useSnackbarsStore();
+
 const isValid = ref<boolean>(false);
+const isLoading = ref<boolean>(false);
 
-const emailRules = [
-  (value: string) => {
-    if (value) return true;
+const identityField: CustomInputField = {
+  name: "identity",
+  type: "text",
+  required: true,
+  label: "Email",
+  placeholder: "Email",
+  rules: emailRules,
+  value: "",
+  error: "",
+};
+const passwordField = createPasswordField();
 
-    return "E-mail is requred.";
-  },
-  (value: string) => {
-    if (emailRegex.test(value)) return true;
+const formInputs = ref([identityField, passwordField]);
 
-    return "E-mail must be valid.";
-  },
-];
-
-const passwordRules = [
-  (value: string) => {
-    if (value?.length >= 8) return true;
-    return "Password must have at least 8 characters";
-  },
-];
-
-const handleSubmit = () => {
-  //TODO validate login
-  console.log(isValid.value);
+const handleSubmit = async () => {
+  isLoading.value = true;
+  const payload: { [key: string]: string } = {};
+  formInputs.value.forEach((input) => {
+    payload[input.name] = input.value;
+  });
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_HOST_URL}/collections/users/auth-with-password`,
+      payload
+    );
+    localStorage.setItem("JWT", response.data.token);
+    snackbarsStore.setSuccessSnackbar(true, "Success!");
+  } catch (err) {
+    handleError(err, formInputs);
+    snackbarsStore.setfailureSnackbar(
+      true,
+      "There has been an error while logging you in"
+    );
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 <template>
   <v-form v-model="isValid" @submit.prevent="handleSubmit()">
-    <v-text-field
-      type="email"
-      placeholder="example@email.com"
-      required
-      label="Email"
-      :rules="emailRules"
-      v-model="email"
-    >
-    </v-text-field>
-    <v-text-field
-      type="password"
-      v-model="password"
-      required
-      :rules="passwordRules"
-      label="Password"
-    >
-    </v-text-field>
-    <v-btn
+    <template v-for="input in formInputs" :key="input.label">
+      <v-text-field
+        v-model="input.value"
+        :type="input.type"
+        :placeholder="input.placeholder"
+        :required="input.required"
+        :rules="input.rules"
+        :label="input.label"
+        @update:model-value="
+          () => {
+            input.error = ``;
+          }
+        "
+        :error-messages="input.error"
+      >
+      </v-text-field>
+    </template>
+    <SubmitButton
+      :loading="isLoading"
       :disabled="!isValid"
-      color="teal-darken-1"
-      type="submit"
-      class="text-none w-100"
-      >Login</v-btn
-    >
+      label="Sign up"
+    ></SubmitButton>
   </v-form>
 </template>

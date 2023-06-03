@@ -1,24 +1,18 @@
 <script setup lang="ts">
 import { handleError } from "@/helpers";
-import { emailRegex } from "@/misc/regex";
 import { CustomInputField } from "@/types";
 import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useSnackbarsStore } from "@/stores/snackbars";
+import { createEmailField, createPasswordField } from "@/shared/fields";
+import SubmitButton from "./ui/SubmitButton.vue";
 
 const nameRules = [
   (value: string) => {
     if (value) return true;
 
     return "Name is required.";
-  },
-];
-
-const passwordRules = [
-  (value: string) => {
-    if (value?.length >= 8) return true;
-    return "Password must have at least 8 characters";
   },
 ];
 
@@ -33,19 +27,6 @@ const passwordConfirmRules = [
   },
 ];
 
-const emailRules = [
-  (value: string) => {
-    if (value) return true;
-
-    return "E-mail is required.";
-  },
-  (value: string) => {
-    if (emailRegex.test(value)) return true;
-
-    return "E-mail must be valid.";
-  },
-];
-
 const nameField: CustomInputField = {
   name: "name",
   type: "text",
@@ -57,27 +38,8 @@ const nameField: CustomInputField = {
   error: "",
 };
 
-const emailField: CustomInputField = {
-  name: "email",
-  type: "email",
-  required: true,
-  label: "Email",
-  placeholder: "Email",
-  rules: emailRules,
-  value: "",
-  error: "",
-};
-
-const passwordField: CustomInputField = {
-  name: "password",
-  type: "password",
-  required: true,
-  label: "Password",
-  placeholder: "Password",
-  rules: passwordRules,
-  value: "",
-  error: "",
-};
+const emailField = createEmailField();
+const passwordField = createPasswordField();
 
 const passwordConfirmField: CustomInputField = {
   name: "passwordConfirm",
@@ -98,8 +60,6 @@ const formInputs = ref([
 ]);
 const isValid = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
-const successSnackbar = ref<boolean>(false);
-const failSnackback = ref<boolean>(false);
 const router = useRouter();
 const snackbarsStore = useSnackbarsStore();
 
@@ -114,12 +74,10 @@ const handleSubmit = async () => {
       `${import.meta.env.VITE_HOST_URL}/collections/users/records`,
       payload
     );
-    successSnackbar.value = true;
     snackbarsStore.setSuccessSnackbar(true, "User successfully created");
     router.push({ name: "Login" });
   } catch (err) {
     handleError(err, formInputs);
-    failSnackback.value = true;
     snackbarsStore.setfailureSnackbar(true, "Error while creating user");
   } finally {
     isLoading.value = false;
@@ -149,13 +107,10 @@ const handleSubmit = async () => {
       >
       </v-text-field>
     </template>
-    <v-btn
+    <SubmitButton
       :loading="isLoading"
-      :disabled="!true"
-      color="teal-darken-1"
-      type="submit"
-      class="text-none w-100 mt-6"
-      >Sign up
-    </v-btn>
+      :disabled="!isValid"
+      label="Sign up"
+    ></SubmitButton>
   </v-form>
 </template>
